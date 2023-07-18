@@ -59,7 +59,7 @@ class _GridViewItemState extends State<GridViewItem> {
                 if (loadingProgress == null) {
                   return child;
                 }
-                return CircularProgressIndicator();
+                return const CircularProgressIndicator();
                 // return Center(
                 //   child: CircularProgressIndicator(
                 //     value: loadingProgress.expectedTotalBytes != null

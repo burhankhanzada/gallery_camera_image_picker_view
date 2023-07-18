@@ -62,8 +62,7 @@ class GalleryCameraBottomSheet {
     if (context.mounted) Navigator.pop(context);
     final result = await ImagePicker().pickImage(source: ImageSource.camera);
     if (result != null) {
-      final pathList = [result.path];
-      controller.addImages(pathList);
+      controller.addImage(result.path);
     }
   }
 }

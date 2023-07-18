@@ -4,6 +4,13 @@ class GalleryCameraImagePickerController extends ChangeNotifier {
   final List<String> _pathList = [];
   List<String> get pathList => _pathList;
 
+  bool get hasNoImages => pathList.isEmpty;
+
+  void addImage(String path) {
+    _pathList.add(path);
+    notifyListeners();
+  }
+
   void addImages(List<String> pathList) {
     _pathList.addAll(pathList);
     notifyListeners();

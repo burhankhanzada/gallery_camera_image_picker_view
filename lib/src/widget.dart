@@ -9,7 +9,10 @@ import 'grid_view_item.dart';
 class GallaryCameraImagePickerView extends StatefulWidget {
   const GallaryCameraImagePickerView({
     super.key,
+    required this.controller,
   });
+
+  final GalleryCameraImagePickerController controller;
 
   @override
   State<GallaryCameraImagePickerView> createState() =>
@@ -19,30 +22,24 @@ class GallaryCameraImagePickerView extends StatefulWidget {
 class _GallaryCameraImagePickerViewState
     extends State<GallaryCameraImagePickerView> {
   final _gridViewKey = GlobalKey();
-
   final _scrollController = ScrollController();
 
-  final controller = GalleryCameraImagePickerController();
-
-  List<String> get _imagesList => controller.pathList;
+  List<String> get _imagesList => widget.controller.pathList;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: ListenableBuilder(
-        listenable: controller,
+        listenable: widget.controller,
         builder: (context, child) {
-          if (controller.pathList.isEmpty) {
-            return _addImages();
-          }
-          return _imagesGrid();
+          return widget.controller.hasNoImages ? _addImages() : _imagesGrid();
         },
       ),
     );
   }
 
-  BoxDecoration boxDecoration() {
+  BoxDecoration _boxDecoration() {
     return BoxDecoration(
       border: DashedBorder.fromBorderSide(
         dashLength: 16,
@@ -61,10 +58,10 @@ class _GallaryCameraImagePickerViewState
     return SizedBox(
       height: 200,
       child: DecoratedBox(
-        decoration: boxDecoration(),
+        decoration: _boxDecoration(),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: showBottomSheet,
+          onTap: _showBottomSheet,
           child: Center(
             child: Text(
               'Add Images',
@@ -76,23 +73,33 @@ class _GallaryCameraImagePickerViewState
     );
   }
 
-  Future<void> showBottomSheet() async {
+  Future<void> _showBottomSheet() async {
     await GalleryCameraBottomSheet(
       context: context,
-      controller: controller,
+      controller: widget.controller,
     ).show();
   }
 
   Widget _imagesGrid() {
     return SingleChildScrollView(
       child: ReorderableBuilder(
+        longPressDelay: const Duration(milliseconds: 100),
         scrollController: _scrollController,
-        dragChildBoxDecoration: const BoxDecoration(
-          boxShadow: [],
+        lockedIndices: [widget.controller.pathList.length],
+        dragChildBoxDecoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              offset: Offset(0, 4),
+              color: Colors.black38,
+              blurRadius: 8,
+              spreadRadius: 1,
+            )
+          ],
         ),
         onReorder: (orderUpdateEntities) {
           for (final orderUpdateEntity in orderUpdateEntities) {
-            controller.reOrderImage(
+            widget.controller.reOrderImage(
               orderUpdateEntity.oldIndex,
               orderUpdateEntity.newIndex,
             );
@@ -115,9 +122,9 @@ class _GallaryCameraImagePickerViewState
                 .map<Widget>(
                   (path) => GridViewItem(
                     path: path,
-                    key: UniqueKey(),
+                    key: ValueKey(path),
                     onCancel: () {
-                      controller.removeImage(path);
+                      widget.controller.removeImage(path);
                     },
                   ),
                 )
@@ -131,10 +138,10 @@ class _GallaryCameraImagePickerViewState
     return SizedBox(
       key: UniqueKey(),
       child: DecoratedBox(
-        decoration: boxDecoration(),
+        decoration: _boxDecoration(),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: showBottomSheet,
+          onTap: _showBottomSheet,
           child: Center(
             child: Text(
               'Add More',
